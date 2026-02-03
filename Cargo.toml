@@ -10,7 +10,7 @@ gstreamer-app = "0.24.4"
 gstreamer-video = "0.24.4"
 
 # OpenCV bindings
-opencv = { version = "0.98.1", features = ["clang-runtime"] }
+# opencv = { version = "0.98.1", features = ["clang-runtime"] }
 
 # ndarray для работы с массивами
 ndarray = "0.17.2"
@@ -32,5 +32,10 @@ pkg-config = "0.3"
 
 [profile.release]
 opt-level = 3
-lto = true
+lto = "fat"
 codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.release.build-override]
+opt-level = 3

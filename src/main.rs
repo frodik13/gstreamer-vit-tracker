@@ -669,7 +669,7 @@ fn main() -> Result<()> {
 
     // Инициализируем rayon
     rayon::ThreadPoolBuilder::new()
-        .num_threads(4)
+        .num_threads(8)
         .build_global()
         .ok();
 
