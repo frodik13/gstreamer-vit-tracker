@@ -1,0 +1,24 @@
+[package]
+name = "gst-opencv-demo"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# GStreamer bindings
+gstreamer = "0.24.4"
+gstreamer-app = "0.24.4"
+gstreamer-video = "0.24.4"
+
+# OpenCV bindings
+opencv = { version = "0.98.1", features = ["clang-runtime"] }
+
+# ndarray для работы с массивами
+ndarray = "0.17.2"
+
+# Для обработки ошибок
+anyhow = "1.0"
+
+signal-hook = "0.4.3"
+
+# Для синхронизации между потоками
+crossbeam-channel = "0.5"
