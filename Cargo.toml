@@ -20,5 +20,7 @@ anyhow = "1.0"
 
 signal-hook = "0.4.3"
 
+vit_tracker = { path = "../vit_tracker"}
+
 # Для синхронизации между потоками
 crossbeam-channel = "0.5"
