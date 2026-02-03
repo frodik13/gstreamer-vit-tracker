@@ -19,8 +19,12 @@ ndarray = "0.17.2"
 anyhow = "1.0"
 
 signal-hook = "0.4.3"
+libc = "0.2"
 
 vit_tracker = { path = "../vit_tracker"}
 
 # Для синхронизации между потоками
 crossbeam-channel = "0.5"
+
+[build-dependencies]
+pkg-config = "0.3"

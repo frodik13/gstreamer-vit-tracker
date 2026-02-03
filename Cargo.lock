@@ -351,8 +351,10 @@ dependencies = [
  "gstreamer",
  "gstreamer-app",
  "gstreamer-video",
+ "libc",
  "ndarray",
  "opencv",
+ "pkg-config",
  "signal-hook",
  "vit_tracker",
 ]
