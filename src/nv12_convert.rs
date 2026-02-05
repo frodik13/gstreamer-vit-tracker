@@ -126,9 +126,9 @@ fn process_row_unsafe(
             let b0 = (y_val0 + bu + 128) >> 8;
 
             let out_idx0 = col * 3;
-            *row_data.get_unchecked_mut(out_idx0) = clamp_u8(b0);
+            *row_data.get_unchecked_mut(out_idx0) = clamp_u8(r0);
             *row_data.get_unchecked_mut(out_idx0 + 1) = clamp_u8(g0);
-            *row_data.get_unchecked_mut(out_idx0 + 2) = clamp_u8(r0);
+            *row_data.get_unchecked_mut(out_idx0 + 2) = clamp_u8(b0);
 
             // Второй пиксель
             let y1 = *y_plane.get_unchecked(y_row_start + col + 1) as usize;
@@ -139,9 +139,9 @@ fn process_row_unsafe(
             let b1 = (y_val1 + bu + 128) >> 8;
 
             let out_idx1 = (col + 1) * 3;
-            *row_data.get_unchecked_mut(out_idx1) = clamp_u8(b1);
+            *row_data.get_unchecked_mut(out_idx1) = clamp_u8(r1);
             *row_data.get_unchecked_mut(out_idx1 + 1) = clamp_u8(g1);
-            *row_data.get_unchecked_mut(out_idx1 + 2) = clamp_u8(r1);
+            *row_data.get_unchecked_mut(out_idx1 + 2) = clamp_u8(b1);
         }
         col += 2;
     }
@@ -161,9 +161,9 @@ fn process_row_unsafe(
             let b = (y_val0 + tables.bu_table[u] + 128) >> 8;
 
             let out_idx = col * 3;
-            *row_data.get_unchecked_mut(out_idx) = clamp_u8(b);
+            *row_data.get_unchecked_mut(out_idx) = clamp_u8(r);
             *row_data.get_unchecked_mut(out_idx + 1) = clamp_u8(g);
-            *row_data.get_unchecked_mut(out_idx + 2) = clamp_u8(r);
+            *row_data.get_unchecked_mut(out_idx + 2) = clamp_u8(b);
         }
     }
 }

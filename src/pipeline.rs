@@ -4,7 +4,6 @@ use anyhow::{Result};
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Instant;
-
 use crate::drawing::*;
 use crate::nv12_convert::*;
 use crate::{timing_stats::TimingStats, tracker_context::TrackerContext, user_commands::UserCommand};
@@ -39,12 +38,19 @@ pub fn create_pipeline(
 
     let identity = gst::ElementFactory::make("identity").build()?;
     let convert = gst::ElementFactory::make("videoconvert").build()?;
-    let sink = gst::ElementFactory::make("autovideosink")
+    let caps_out = gst::ElementFactory::make("capsfilter").build()?;
+    caps_out.set_property(
+        "caps",
+        &gst::Caps::builder("video/x-raw")
+            .field("format", "RGB")
+            .build(),
+    );      
+    let sink = gst::ElementFactory::make("kmssink")
         .property("sync", false)
         .build()?;
 
-    pipeline.add_many([&src, &caps, &identity, &convert, &sink])?;
-    gst::Element::link_many([&src, &caps, &identity, &convert, &sink])?;
+    pipeline.add_many([&src, &caps, &identity, &convert, &caps_out, &sink])?;
+    gst::Element::link_many([&src, &caps, &identity, &convert, &caps_out, &sink])?;
 
     let ctx = Arc::new(Mutex::new(TrackerContext::new(MODEL_PATH, width, heigth)?));
     let stats = Arc::new(Mutex::new(TimingStats::new()));
@@ -92,7 +98,7 @@ pub fn create_pipeline(
         };
 
         let data = map.as_mut_slice();
-        let (w, h) = (1920usize, 1080usize);
+        let (w, h) = (width as usize, heigth as usize);
 
         // Конвертация NV12 -> BGR (полный кадр, но параллельно)
         let t0 = Instant::now();
@@ -116,7 +122,7 @@ pub fn create_pipeline(
         stats_clone.lock().unwrap().add_times(conv_time, track_time);
 
         // Отрисовка
-        draw_background_nv12(data, w, h, 10, 10, 400, 80, 180);
+        draw_background_nv12(data, w, h, 10, 10, 400, 80, 254);
         draw_text_nv12(data, w, h, &state_name, 15, 15, 2, 255);
 
         let (fps, conv_ms, track_ms) = {
