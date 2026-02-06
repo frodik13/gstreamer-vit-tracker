@@ -37,20 +37,20 @@ pub fn create_pipeline(
     );
 
     let identity = gst::ElementFactory::make("identity").build()?;
-    let convert = gst::ElementFactory::make("videoconvert").build()?;
-    let caps_out = gst::ElementFactory::make("capsfilter").build()?;
-    caps_out.set_property(
-        "caps",
-        &gst::Caps::builder("video/x-raw")
-            .field("format", "RGB")
-            .build(),
-    );      
-    let sink = gst::ElementFactory::make("kmssink")
-        .property("sync", false)
+
+    let queue = gst::ElementFactory::make("queue")
+        .property("max-size-buffers", 2u32) // Буфер на 2 кадра
+        .property_from_str("leaky", "2") // downstream (если не успеваем отображать - дропаем старые кадры вывода, но не тормозим обработку)
         .build()?;
 
-    pipeline.add_many([&src, &caps, &identity, &convert, &caps_out, &sink])?;
-    gst::Element::link_many([&src, &caps, &identity, &convert, &caps_out, &sink])?;
+    let sink = gst::ElementFactory::make("kmssink")
+        .property("sync", false)
+        .property("connector-id", 231i32)
+        .property("plane-id", 72i32)
+        .build()?;
+
+    pipeline.add_many([&src, &caps, &identity, &queue, &sink])?;
+    gst::Element::link_many([&src, &caps, &identity, &queue, &sink])?;
 
     let ctx = Arc::new(Mutex::new(TrackerContext::new(MODEL_PATH, width, heigth)?));
     let stats = Arc::new(Mutex::new(TimingStats::new()));
@@ -102,14 +102,14 @@ pub fn create_pipeline(
 
         // Конвертация NV12 -> BGR (полный кадр, но параллельно)
         let t0 = Instant::now();
-        let bgr = nv12_full_to_bgr_parallel(data, w, h);
+        let rgb = nv12_full_to_rgb_parallel(data, w, h);
         let conv_time = t0.elapsed().as_micros() as u64;
 
         // Трекинг
         let t1 = Instant::now();
         let (bbox, state_name, score, selection) = {
             let mut ctx = ctx_clone.lock().unwrap();
-            let result = ctx.process_frame(&bgr.view());
+            let result = ctx.process_frame(&rgb.view());
             (
                 result,
                 ctx.state_name().to_string(),
@@ -122,7 +122,7 @@ pub fn create_pipeline(
         stats_clone.lock().unwrap().add_times(conv_time, track_time);
 
         // Отрисовка
-        draw_background_nv12(data, w, h, 10, 10, 400, 80, 254);
+        draw_background_nv12(data, w, h, 10, 10, 400, 80, 150);
         draw_text_nv12(data, w, h, &state_name, 15, 15, 2, 255);
 
         let (fps, conv_ms, track_ms) = {

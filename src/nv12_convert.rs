@@ -43,7 +43,7 @@ fn clamp_u8(val: i32) -> u8 {
 }
 
 /// Максимально оптимизированная конвертация NV12 -> BGR
-pub fn nv12_full_to_bgr_parallel(nv12_data: &[u8], width: usize, height: usize) -> Array3<u8> {
+pub fn nv12_full_to_rgb_parallel(nv12_data: &[u8], width: usize, height: usize) -> Array3<u8> {
     let y_plane_size = width * height;
     if nv12_data.len() < y_plane_size * 3 / 2 {
         return Array3::<u8>::zeros((height, width, 3));
