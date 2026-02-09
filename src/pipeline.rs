@@ -39,7 +39,7 @@ pub fn create_pipeline(
     let identity = gst::ElementFactory::make("identity").build()?;
 
     let queue = gst::ElementFactory::make("queue")
-        .property("max-size-buffers", 2u32) // Буфер на 2 кадра
+        .property("max-size-buffers", 3u32) // Буфер на 2 кадра
         .property_from_str("leaky", "2") // downstream (если не успеваем отображать - дропаем старые кадры вывода, но не тормозим обработку)
         .build()?;
 
@@ -65,7 +65,7 @@ pub fn create_pipeline(
     let pad = identity.static_pad("src").unwrap();
 
     pad.add_probe(gst::PadProbeType::BUFFER, move |_pad, probe_info| {
-        // Замер интервала
+        // Замер интервалаv
         let now = Instant::now();
         {
             let mut last = last_time.lock().unwrap();
@@ -100,7 +100,7 @@ pub fn create_pipeline(
         let data = map.as_mut_slice();
         let (w, h) = (width as usize, heigth as usize);
 
-        // Конвертация NV12 -> BGR (полный кадр, но параллельно)
+        // Конвертация NV12 -> RGB (полный кадр, но параллельно)
         let t0 = Instant::now();
         let rgb = nv12_full_to_rgb_parallel(data, w, h);
         let conv_time = t0.elapsed().as_micros() as u64;
