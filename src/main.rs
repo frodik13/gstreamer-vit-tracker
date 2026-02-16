@@ -7,6 +7,8 @@ mod app_state;
 mod tracker_context;
 mod drawing;
 mod pipeline;
+mod pipeline_ir;
+mod drawing_rgb;
 
 use anyhow::{anyhow, Result};
 use gstreamer as gst;
@@ -15,6 +17,7 @@ use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc};
 
+use crate::pipeline_ir::create_pipeline_ir;
 use crate::raw_mode_guard::*;
 
 use pipeline::*;
@@ -26,7 +29,7 @@ fn main() -> Result<()> {
     println!("   VitTrack - Interactive Selection\r");
     println!("==========================================\r\n");
 
-    let device = "/dev/video11";
+    let device = "/dev/video21";
 
     if !Path::new(device).exists() {
         return Err(anyhow!("Camera not found: {}", device));
@@ -43,7 +46,7 @@ fn main() -> Result<()> {
         .ok();
 
     let (tx, rx) = std::sync::mpsc::channel();
-    let (pipeline, _ctx, _stats) = create_pipeline(device, rx)?;
+    let (pipeline, _ctx, _stats) = create_pipeline_ir(device, rx)?;
 
     pipeline.set_state(gst::State::Playing)?;
 
